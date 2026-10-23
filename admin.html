@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Administración - Sonrisa Sana</title>
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <div class="app">
+
+    <!-- LATERAL -->
+    <aside class="sidebar">
+      <a href="#" class="logo">
+        <span class="icono">&#129463;</span>
+        Admin
+      </a>
+
+      <nav class="nav-lateral">
+        <button class="activo" data-panel="inicio">&#128200; Agenda</button>
+        <button data-panel="pacientes">&#128101; Pacientes</button>
+        <button data-panel="odontologos">&#129463; Odontólogos</button>
+        <button data-panel="citas">&#128197; Citas</button>
+        <button data-panel="historias">&#128203; Historias clínicas</button>
+        <button data-panel="facturas">&#128179; Facturas</button>
+        <button data-panel="auditoria">&#128274; Auditoría</button>
+      </nav>
+
+      <div class="sidebar-usuario">
+        <div>
+          <strong id="usuario-nombre">...</strong>
+          <span>Administrador</span>
+        </div>
+        <button onclick="cerrarSesion()">Cerrar sesión</button>
+      </div>
+    </aside>
+
+    <!-- CONTENIDO -->
+    <main class="contenido">
+
+      <!-- DASHBOARD -->
+      <section class="panel activo" id="panel-inicio">
+        <h1>Agenda</h1>
+        <p class="subtitulo">Resumen general y últimas citas del centro odontológico.</p>
+
+        <div class="grid grid-4" style="margin-bottom:1.5rem;">
+          <div class="stat">
+            <div class="valor" id="stat-pacientes">0</div>
+            <div class="etiqueta">Pacientes</div>
+          </div>
+          <div class="stat">
+            <div class="valor" id="stat-citas">0</div>
+            <div class="etiqueta">Citas totales</div>
+          </div>
+          <div class="stat">
+            <div class="valor" id="stat-pendientes">0</div>
+            <div class="etiqueta">Citas pendientes</div>
+          </div>
+          <div class="stat">
+            <div class="valor" id="stat-ingresos">$0</div>
+            <div class="etiqueta">Facturado</div>
+          </div>
+        </div>
+
+        <div class="form-panel">
+          <h3>Últimas citas</h3>
+          <div class="tabla-contenedor" style="box-shadow:none;border:none;">
+            <table>
+              <thead>
+                <tr>
+                  <th>Paciente</th>
+                  <th>Odontólogo</th>
+                  <th>Fecha</th>
+                  <th>Estado</th>
+                </tr>
+              </thead>
+              <tbody id="tabla-recientes">
+                <tr><td colspan="4" class="vacio">Cargando...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- PACIENTES -->
+      <section class="panel" id="panel-pacientes">
+        <h1>Pacientes</h1>
+        <p class="subtitulo">Usuarios registrados. Cambia el rol (paciente / médico / admin) desde la columna Rol.</p>
+
+        <div class="barra-herramientas">
+          <input type="text" class="buscar" id="buscar-paciente"
+                 placeholder="Buscar por nombre, correo o género..." oninput="filtrarPacientes()" />
+          <span id="conteo-pacientes" style="color:var(--texto-suave);font-size:0.9rem;"></span>
+        </div>
+
+        <div class="tabla-contenedor">
+          <table>
+            <thead>
+              <tr>
+                <th>Nombre</th>
+                <th>Edad</th>
+                <th>Género</th>
+                <th>Teléfono</th>
+                <th>Dirección</th>
+                <th>Correo</th>
+                <th>Rol</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="tabla-pacientes">
+              <tr><td colspan="8" class="vacio">Cargando...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ODONTÓLOGOS -->
+      <section class="panel" id="panel-odontologos">
+        <h1>Odontólogos</h1>
+        <p class="subtitulo">Equipo profesional del centro.</p>
+
+        <div class="form-panel">
+          <h3>Registrar odontólogo</h3>
+          <form class="formulario" id="form-odontologo">
+            <div class="formulario-2">
+              <div class="campo">
+                <label for="odo-nombre">Nombre completo *</label>
+                <input type="text" id="odo-nombre" required maxlength="100" placeholder="Ej: Dra. Ana Ríos" />
+              </div>
+              <div class="campo">
+                <label for="odo-especialidad">Especialidad *</label>
+                <select id="odo-especialidad" required>
+                  <option value="">Selecciona...</option>
+                  <option>Ortodoncia</option>
+                  <option>Endodoncia</option>
+                  <option>Periodoncia</option>
+                  <option>Odontopediatría</option>
+                  <option>Prostodoncia</option>
+                  <option>Cirugía Maxilofacial</option>
+                  <option>Medicina General</option>
+                </select>
+              </div>
+              <div class="campo">
+                <label for="odo-telefono">Teléfono</label>
+                <input type="tel" id="odo-telefono" maxlength="15" placeholder="Ej: 3124567890" />
+              </div>
+            </div>
+            <div class="alerta alerta-error oculto" id="odo-error"></div>
+            <button type="submit" class="btn btn-primario">Guardar odontólogo</button>
+          </form>
+        </div>
+
+        <div class="tabla-contenedor">
+          <table>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Nombre</th>
+                <th>Especialidad</th>
+                <th>Teléfono</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="tabla-odontologos">
+              <tr><td colspan="5" class="vacio">Cargando...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- CITAS -->
+      <section class="panel" id="panel-citas">
+        <h1>Gestión de citas</h1>
+        <p class="subtitulo">Agenda, confirma y actualiza el estado de las citas.</p>
+
+        <div class="form-panel">
+          <h3>Crear cita (admin)</h3>
+          <form class="formulario" id="form-cita-admin">
+            <div class="formulario-2">
+              <div class="campo">
+                <label for="ac-paciente">Paciente *</label>
+                <select id="ac-paciente" required>
+                  <option value="">Selecciona...</option>
+                </select>
+              </div>
+              <div class="campo">
+                <label for="ac-odontologo">Odontólogo *</label>
+                <select id="ac-odontologo" required>
+                  <option value="">Selecciona...</option>
+                </select>
+              </div>
+              <div class="campo">
+                <label for="ac-fecha">Fecha y hora *</label>
+                <input type="datetime-local" id="ac-fecha" required />
+              </div>
+              <div class="campo">
+                <label for="ac-motivo">Motivo</label>
+                <input type="text" id="ac-motivo" maxlength="150" placeholder="Ej: Control de ortodoncia" />
+              </div>
+            </div>
+            <div class="alerta alerta-error oculto" id="ac-error"></div>
+            <button type="submit" class="btn btn-primario">Crear cita</button>
+          </form>
+        </div>
+
+        <div class="barra-herramientas">
+          <input type="text" class="buscar" id="buscar-cita"
+                 placeholder="Buscar por paciente, motivo u odontólogo..."
+                 oninput="filtrarCitas()" />
+          <select id="filtro-estado" onchange="filtrarCitas()">
+            <option value="">Todos los estados</option>
+            <option value="pendiente">Pendiente</option>
+            <option value="confirmada">Confirmada</option>
+            <option value="atendida">Atendida</option>
+            <option value="cancelada">Cancelada</option>
+          </select>
+        </div>
+
+        <div class="tabla-contenedor">
+          <table>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Paciente</th>
+                <th>Odontólogo</th>
+                <th>Fecha</th>
+                <th>Motivo</th>
+                <th>Estado</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="tabla-citas">
+              <tr><td colspan="7" class="vacio">Cargando...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- HISTORIAS CLÍNICAS -->
+      <section class="panel" id="panel-historias">
+        <h1>Historias clínicas</h1>
+        <p class="subtitulo">Registra diagnósticos y tratamientos de cada paciente.</p>
+
+        <div class="form-panel">
+          <h3>Nuevo registro clínico</h3>
+          <form class="formulario" id="form-historia">
+            <div class="formulario-2">
+              <div class="campo">
+                <label for="h-paciente">Paciente *</label>
+                <select id="h-paciente" required>
+                  <option value="">Selecciona...</option>
+                </select>
+              </div>
+              <div class="campo">
+                <label for="h-cita">Cita relacionada</label>
+                <select id="h-cita">
+                  <option value="">Sin cita específica</option>
+                </select>
+              </div>
+            </div>
+            <div class="campo">
+              <label for="h-diagnostico">Diagnóstico *</label>
+              <input type="text" id="h-diagnostico" required maxlength="150"
+                     placeholder="Ej: Caries en pieza 46" />
+            </div>
+            <div class="campo">
+              <label for="h-tratamiento">Tratamiento</label>
+              <input type="text" id="h-tratamiento" maxlength="150"
+                     placeholder="Ej: Resina composite, control en 15 días" />
+            </div>
+            <div class="campo">
+              <label for="h-notas">Notas adicionales</label>
+              <textarea id="h-notas" rows="2" maxlength="250" placeholder="Observaciones..."></textarea>
+            </div>
+            <div class="alerta alerta-error oculto" id="h-error"></div>
+            <button type="submit" class="btn btn-primario">Guardar registro</button>
+          </form>
+        </div>
+
+        <div class="tabla-contenedor">
+          <table>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Paciente</th>
+                <th>Fecha</th>
+                <th>Diagnóstico</th>
+                <th>Tratamiento</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="tabla-historias">
+              <tr><td colspan="6" class="vacio">Cargando...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- FACTURAS -->
+      <section class="panel" id="panel-facturas">
+        <h1>Facturas</h1>
+        <p class="subtitulo">Facturación de las citas atendidas.</p>
+
+        <div class="form-panel">
+          <h3>Nueva factura</h3>
+          <form class="formulario" id="form-factura">
+            <div class="formulario-2">
+              <div class="campo">
+                <label for="f-cita">Cita *</label>
+                <select id="f-cita" required>
+                  <option value="">Selecciona...</option>
+                </select>
+              </div>
+              <div class="campo">
+                <label for="f-total">Total ($) *</label>
+                <input type="number" id="f-total" required min="0" step="1000"
+                       placeholder="Ej: 80000" />
+              </div>
+            </div>
+            <div class="campo">
+              <label for="f-detalle">Detalle</label>
+              <input type="text" id="f-detalle" maxlength="150"
+                     placeholder="Ej: Limpieza dental + fluoride" />
+            </div>
+            <div class="alerta alerta-error oculto" id="f-error"></div>
+            <button type="submit" class="btn btn-primario">Emitir factura</button>
+          </form>
+        </div>
+
+        <div class="tabla-contenedor">
+          <table>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Fecha</th>
+                <th>Paciente</th>
+                <th>Cita</th>
+                <th>Detalle</th>
+                <th>Total</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="tabla-facturas">
+              <tr><td colspan="7" class="vacio">Cargando...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- AUDITORÍA -->
+      <section class="panel" id="panel-auditoria">
+        <h1>Auditoría</h1>
+        <p class="subtitulo">Registro automático de quién creó, modificó o eliminó datos del sistema.</p>
+
+        <div class="barra-herramientas">
+          <input type="text" class="buscar" id="buscar-auditoria"
+                 placeholder="Buscar por usuario, tabla o acción..."
+                 oninput="filtrarAuditoria()" />
+          <span id="conteo-auditoria" style="color:var(--texto-suave);font-size:0.9rem;"></span>
+        </div>
+
+        <div class="tabla-contenedor">
+          <table>
+            <thead>
+              <tr>
+                <th>Fecha</th>
+                <th>Usuario</th>
+                <th>Tabla</th>
+                <th>Acción</th>
+                <th># Registro</th>
+                <th>Detalle</th>
+              </tr>
+            </thead>
+            <tbody id="tabla-auditoria">
+              <tr><td colspan="6" class="vacio">Cargando...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/config.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/admin.js"></script>
+</body>
+</html>

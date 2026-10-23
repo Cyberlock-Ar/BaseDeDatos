@@ -1,0 +1,76 @@
+@startuml
+left to right direction
+skinparam shadowing false
+skinparam actorStyle awesome
+skinparam usecase {
+  BackgroundColor #E0F2F1
+  BorderColor #0D9488
+  FontSize 13
+}
+skinparam rectangle {
+  BorderColor #0F766E
+  BackgroundColor #FFFFFF
+}
+title <b>Diagrama de Casos de Uso</b>\n<b>Centro Odontológico Sonrisa Sana</b>
+
+actor "Paciente" as P
+actor "Administrador" as A
+
+rectangle "Sistema Web: Centro Odontológico (HTML/JS + Supabase)" {
+
+  usecase "Registrarse" as UCReg
+  usecase "Iniciar sesión" as UCLogin
+  usecase "Cerrar sesión" as UCLogout
+
+  usecase "Agendar cita" as UCAgendar
+  usecase "Cancelar cita" as UCCancelar
+  usecase "Ver mis citas" as UVMisCitas
+  usecase "Consultar historial clínico" as UCHist
+  usecase "Ver facturas" as UVFact
+
+  usecase "Ver agenda y estadísticas" as UCAgenda
+  usecase "Gestionar pacientes" as UCGPac
+  usecase "Gestionar odontólogos" as UCGOdo
+  usecase "Gestionar citas\n(crear, confirmar, atender)" as UCGCitas
+  usecase "Registrar historia clínica" as UCGHist
+  usecase "Emitir factura" as UCFact
+  usecase "Consultar auditoría" as UCAudit
+}
+
+P --> UCReg
+P --> UCLogin
+P --> UCLogout
+P --> UCAgendar
+P --> UCCancelar
+P --> UVMisCitas
+P --> UCHist
+P --> UVFact
+
+A --> UCLogin
+A --> UCLogout
+A --> UCAgenda
+A --> UCGPac
+A --> UCGOdo
+A --> UCGCitas
+A --> UCGHist
+A --> UCFact
+A --> UCAudit
+
+UCAgendar ..> UCLogin : <<include>>
+UCGCitas ..> UCLogin : <<include>>
+UCAudit ..> UCLogin : <<include>>
+
+UCCancelar ..> UVMisCitas : <<extend>>
+UCFact ..> UCGCitas : <<extend>>
+
+note right of UCAudit
+  Solo el rol "admin" accede
+  a este caso de uso (RLS)
+end note
+
+note bottom of UCReg
+  El sistema crea el usuario
+  con rol "paciente" automáticamente
+end note
+
+@enduml

@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Panel médico - Sonrisa Sana</title>
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <div class="app">
+
+    <!-- LATERAL -->
+    <aside class="sidebar">
+      <a href="#" class="logo">
+        <span class="icono">&#129463;</span>
+        Odontólogo
+      </a>
+
+      <nav class="nav-lateral">
+        <button class="activo" data-panel="inicio">&#128200; Agenda</button>
+        <button data-panel="citas">&#128197; Mis citas</button>
+        <button data-panel="pacientes">&#128101; Pacientes</button>
+        <button data-panel="historias">&#128203; Historias clínicas</button>
+      </nav>
+
+      <div class="sidebar-usuario">
+        <div>
+          <strong id="usuario-nombre">...</strong>
+          <span>Médico</span>
+        </div>
+        <button onclick="cerrarSesion()">Cerrar sesión</button>
+      </div>
+    </aside>
+
+    <!-- CONTENIDO -->
+    <main class="contenido">
+
+      <!-- AGENDA / INICIO -->
+      <section class="panel activo" id="panel-inicio">
+        <h1>Agenda</h1>
+        <p class="subtitulo">Resumen de tu actividad clínica.</p>
+
+        <div class="grid grid-4" style="margin-bottom:1.5rem;">
+          <div class="stat">
+            <div class="valor" id="stat-citas">0</div>
+            <div class="etiqueta">Citas totales</div>
+          </div>
+          <div class="stat">
+            <div class="valor" id="stat-pendientes">0</div>
+            <div class="etiqueta">Pendientes</div>
+          </div>
+          <div class="stat">
+            <div class="valor" id="stat-atendidas">0</div>
+            <div class="etiqueta">Atendidas</div>
+          </div>
+          <div class="stat">
+            <div class="valor" id="stat-pacientes">0</div>
+            <div class="etiqueta">Pacientes</div>
+          </div>
+        </div>
+
+        <div class="form-panel">
+          <h3>Próximas citas</h3>
+          <div id="proxima-cita"><p class="vacio">Cargando...</p></div>
+        </div>
+      </section>
+
+      <!-- CITAS -->
+      <section class="panel" id="panel-citas">
+        <h1>Mis citas</h1>
+        <p class="subtitulo">Confirma y registra la atención de tus citas.</p>
+
+        <div class="barra-herramientas">
+          <input type="text" class="buscar" id="buscar-cita"
+                 placeholder="Buscar por paciente o motivo..."
+                 oninput="filtrarCitas()" />
+          <select id="filtro-estado" onchange="filtrarCitas()">
+            <option value="">Todos los estados</option>
+            <option value="pendiente">Pendiente</option>
+            <option value="confirmada">Confirmada</option>
+            <option value="atendida">Atendida</option>
+            <option value="cancelada">Cancelada</option>
+          </select>
+        </div>
+
+        <div class="tabla-contenedor">
+          <table>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Paciente</th>
+                <th>Fecha</th>
+                <th>Motivo</th>
+                <th>Estado</th>
+              </tr>
+            </thead>
+            <tbody id="tabla-citas">
+              <tr><td colspan="5" class="vacio">Cargando...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- PACIENTES -->
+      <section class="panel" id="panel-pacientes">
+        <h1>Pacientes</h1>
+        <p class="subtitulo">Datos de los pacientes registrados (solo consulta).</p>
+
+        <div class="barra-herramientas">
+          <input type="text" class="buscar" id="buscar-paciente"
+                 placeholder="Buscar por nombre, teléfono o género..."
+                 oninput="filtrarPacientes()" />
+          <span id="conteo-pacientes" style="color:var(--texto-suave);font-size:0.9rem;"></span>
+        </div>
+
+        <div class="tabla-contenedor">
+          <table>
+            <thead>
+              <tr>
+                <th>Nombre</th>
+                <th>Edad</th>
+                <th>Género</th>
+                <th>Teléfono</th>
+                <th>Dirección</th>
+              </tr>
+            </thead>
+            <tbody id="tabla-pacientes">
+              <tr><td colspan="5" class="vacio">Cargando...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- HISTORIAS CLÍNICAS -->
+      <section class="panel" id="panel-historias">
+        <h1>Historias clínicas</h1>
+        <p class="subtitulo">Consulta los diagnósticos y registra nuevos hallazgos.</p>
+
+        <div class="form-panel">
+          <h3>Nuevo registro clínico</h3>
+          <form class="formulario" id="form-historia">
+            <div class="campo">
+              <label for="h-paciente">Paciente *</label>
+              <select id="h-paciente" required>
+                <option value="">Selecciona...</option>
+              </select>
+            </div>
+            <div class="campo">
+              <label for="h-diagnostico">Diagnóstico *</label>
+              <input type="text" id="h-diagnostico" required maxlength="150"
+                     placeholder="Ej: Caries en pieza 46" />
+            </div>
+            <div class="campo">
+              <label for="h-tratamiento">Tratamiento</label>
+              <input type="text" id="h-tratamiento" maxlength="150"
+                     placeholder="Ej: Resina composite, control en 15 días" />
+            </div>
+            <div class="campo">
+              <label for="h-notas">Notas adicionales</label>
+              <textarea id="h-notas" rows="2" maxlength="250" placeholder="Observaciones..."></textarea>
+            </div>
+            <div class="alerta alerta-error oculto" id="h-error"></div>
+            <div class="alerta alerta-exito oculto" id="h-exito"></div>
+            <button type="submit" class="btn btn-primario">Guardar registro</button>
+          </form>
+        </div>
+
+        <div class="tabla-contenedor">
+          <table>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Paciente</th>
+                <th>Fecha</th>
+                <th>Diagnóstico</th>
+                <th>Tratamiento</th>
+              </tr>
+            </thead>
+            <tbody id="tabla-historias">
+              <tr><td colspan="5" class="vacio">Cargando...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/config.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/medico.js"></script>
+</body>
+</html>

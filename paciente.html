@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mi panel - Sonrisa Sana</title>
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <div class="app">
+
+    <!-- LATERAL -->
+    <aside class="sidebar">
+      <a href="#" class="logo">
+        <span class="icono">&#129463;</span>
+        Sonrisa Sana
+      </a>
+
+      <nav class="nav-lateral">
+        <button class="activo" data-panel="inicio">&#127968; Inicio</button>
+        <button data-panel="citas">&#128197; Mis citas</button>
+        <button data-panel="historial">&#128203; Mi historial</button>
+        <button data-panel="facturas">&#128179; Mis facturas</button>
+      </nav>
+
+      <div class="sidebar-usuario">
+        <div>
+          <strong id="usuario-nombre">...</strong>
+          <span id="usuario-email"></span>
+        </div>
+        <button onclick="cerrarSesion()">Cerrar sesión</button>
+      </div>
+    </aside>
+
+    <!-- CONTENIDO -->
+    <main class="contenido">
+
+      <!-- INICIO -->
+      <section class="panel activo" id="panel-inicio">
+        <h1>Hola, <span id="bienvenida">paciente</span> &#128075;</h1>
+        <p class="subtitulo">Desde aquí puedes agendar citas y revisar tu información.</p>
+
+        <div class="grid grid-4" style="margin-bottom:1.5rem;">
+          <div class="stat">
+            <div class="valor" id="stat-citas">0</div>
+            <div class="etiqueta">Citas agendadas</div>
+          </div>
+          <div class="stat">
+            <div class="valor" id="stat-pendientes">0</div>
+            <div class="etiqueta">Pendientes / confirmadas</div>
+          </div>
+          <div class="stat">
+            <div class="valor" id="stat-historias">0</div>
+            <div class="etiqueta">Registros clínicos</div>
+          </div>
+          <div class="stat">
+            <div class="valor" id="stat-facturas">0</div>
+            <div class="etiqueta">Facturas</div>
+          </div>
+        </div>
+
+        <div class="form-panel">
+          <h3>Próxima cita</h3>
+          <div id="proxima-cita"><p class="vacio">Cargando...</p></div>
+        </div>
+      </section>
+
+      <!-- CITAS -->
+      <section class="panel" id="panel-citas">
+        <h1>Mis citas</h1>
+        <p class="subtitulo">Agenda una nueva cita con nuestro equipo odontológico.</p>
+
+        <div class="form-panel">
+          <h3>Agendar nueva cita</h3>
+          <form class="formulario" id="form-cita">
+            <div class="formulario-2">
+              <div class="campo">
+                <label for="cita-odontologo">Odontólogo *</label>
+                <select id="cita-odontologo" required>
+                  <option value="">Selecciona...</option>
+                </select>
+              </div>
+              <div class="campo">
+                <label for="cita-fecha">Fecha y hora *</label>
+                <input type="datetime-local" id="cita-fecha" required />
+              </div>
+            </div>
+            <div class="campo">
+              <label for="cita-motivo">Motivo de la consulta *</label>
+              <textarea id="cita-motivo" rows="2" required maxlength="150"
+                    placeholder="Ej: Dolor en muela inferior derecha"></textarea>
+            </div>
+            <div class="alerta alerta-error oculto" id="cita-error"></div>
+            <div class="alerta alerta-exito oculto" id="cita-exito"></div>
+            <button type="submit" class="btn btn-primario" id="btn-cita">Agendar cita</button>
+          </form>
+        </div>
+
+        <div class="lista" id="lista-citas">
+          <p class="vacio">Cargando citas...</p>
+        </div>
+      </section>
+
+      <!-- HISTORIAL -->
+      <section class="panel" id="panel-historial">
+        <h1>Mi historia clínica</h1>
+        <p class="subtitulo">Diagnósticos y tratamientos registrados por el equipo médico.</p>
+        <div class="lista" id="lista-historial">
+          <p class="vacio">Cargando historial...</p>
+        </div>
+      </section>
+
+      <!-- FACTURAS -->
+      <section class="panel" id="panel-facturas">
+        <h1>Mis facturas</h1>
+        <p class="subtitulo">Conceptos facturados por tus citas atendidas.</p>
+        <div class="tabla-contenedor">
+          <table>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Fecha</th>
+                <th>Cita</th>
+                <th>Detalle</th>
+                <th>Total</th>
+              </tr>
+            </thead>
+            <tbody id="tabla-facturas">
+              <tr><td colspan="5" class="vacio">Cargando facturas...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/config.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/paciente.js"></script>
+</body>
+</html>

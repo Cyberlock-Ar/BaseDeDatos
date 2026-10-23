@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Centro Odontológico Sonrisa Sana</title>
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+
+  <!-- NAVBAR -->
+  <nav class="navbar">
+    <div class="contenedor">
+      <a href="index.html" class="logo">
+        <span class="icono">&#129463;</span>
+        Sonrisa Sana
+      </a>
+      <div class="nav-enlaces">
+        <a class="btn btn-fantasma" href="#servicios">Servicios</a>
+        <a class="btn btn-fantasma" href="#equipo">Equipo</a>
+        <button class="btn btn-secundario" onclick="abrirLogin()">Iniciar sesión</button>
+        <a class="btn btn-primario" href="registro.html">Registrarse</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <header class="hero">
+    <div class="contenedor">
+      <h1>Tu sonrisa, en buenas manos</h1>
+      <p>
+        Centro odontológico con odontólogos especializados, agendamiento
+        en línea, historias clínicas digitales y facturación rápida.
+      </p>
+      <div class="hero-botones">
+        <button class="btn btn-claro" onclick="abrirLogin()">Agendar mi cita</button>
+        <a class="btn btn-outline" href="registro.html">Crear cuenta</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- SERVICIOS -->
+  <section class="seccion" id="servicios">
+    <div class="contenedor">
+      <div class="titulo-seccion">
+        <h2>Nuestros servicios</h2>
+        <p>Odontología integral para toda la familia</p>
+      </div>
+      <div class="grid grid-3">
+        <div class="tarjeta">
+          <span class="emoji">&#129463;</span>
+          <h3>Ortodoncia</h3>
+          <p>Alineadores, brackets metálicos y cerámicos para todas las edades.</p>
+        </div>
+        <div class="tarjeta">
+          <span class="emoji">&#128296;</span>
+          <h3>Endodoncia</h3>
+          <p>Tratamientos de conducto con tecnología y anestesia suave.</p>
+        </div>
+        <div class="tarjeta">
+          <span class="emoji">&#128137;</span>
+          <h3>Periodoncia</h3>
+          <p>Limpieza, raspado y tratamiento de encías sangrantes.</p>
+        </div>
+        <div class="tarjeta">
+          <span class="emoji">&#128118;</span>
+          <h3>Odontopediatría</h3>
+          <p>Cuidado dental para los más pequeños en un ambiente amigable.</p>
+        </div>
+        <div class="tarjeta">
+          <span class="emoji">&#129392;</span>
+          <h3>Prostodoncia</h3>
+          <p>Prótesis dentales fijas y removibles con mejor ajuste.</p>
+        </div>
+        <div class="tarjeta">
+          <span class="emoji">&#127919;</span>
+          <h3>Cirugía maxilofacial</h3>
+          <p>Extracciones complejas e implantes dentales.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- EQUIPO -->
+  <section class="seccion" id="equipo" style="background:#eefcf9;">
+    <div class="contenedor">
+      <div class="titulo-seccion">
+        <h2>Nuestro equipo</h2>
+        <p>Profesionales certificados a tu servicio</p>
+      </div>
+      <div class="grid grid-3" id="lista-doctores">
+        <p class="vacio">Cargando equipo...</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    Centro Odontológico Sonrisa Sana &copy; 2026 &mdash; Proyecto de Base de Datos
+  </footer>
+
+  <!-- MODAL LOGIN -->
+  <div class="modal-fondo oculto" id="modal-login">
+    <div class="modal">
+      <button class="cerrar" onclick="cerrarLogin()">&times;</button>
+      <h2>Iniciar sesión</h2>
+      <form class="formulario" id="form-login">
+        <div class="campo">
+          <label for="login-email">Correo electrónico</label>
+          <input type="email" id="login-email" required placeholder="tucorreo@ejemplo.com" />
+        </div>
+        <div class="campo">
+          <label for="login-clave">Contraseña</label>
+          <input type="password" id="login-clave" required minlength="6" placeholder="********" />
+        </div>
+        <div class="alerta alerta-error oculto" id="login-error"></div>
+        <button type="submit" class="btn btn-primario btn-ancho" id="btn-login">Entrar</button>
+        <p style="text-align:center;font-size:0.9rem;">
+          ¿No tienes cuenta? <a href="registro.html">Regístrate aquí</a>
+        </p>
+      </form>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/config.js"></script>
+  <script src="js/auth.js"></script>
+  <script>
+    // Si ya hay sesión iniciada, enviar al panel correcto
+    (async () => {
+      const session = await obtenerSesion();
+      if (session) {
+        const perfil = await obtenerPerfil();
+        if (perfil) {
+          window.location.href =
+            perfil.rol === "admin" ? "admin.html" :
+            perfil.rol === "medico" ? "medico.html" : "paciente.html";
+        }
+      }
+    })();
+
+    // Modal de login
+    function abrirLogin() {
+      document.getElementById("modal-login").classList.remove("oculto");
+      document.getElementById("login-email").focus();
+    }
+
+    function cerrarLogin() {
+      document.getElementById("modal-login").classList.add("oculto");
+      limpiarError("login-error");
+    }
+
+    // Cerrar modal con clic fuera
+    document.getElementById("modal-login").addEventListener("click", (e) => {
+      if (e.target.id === "modal-login") cerrarLogin();
+    });
+
+    // Login
+    document.getElementById("form-login").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      limpiarError("login-error");
+      const btn = document.getElementById("btn-login");
+      btn.disabled = true;
+      btn.textContent = "Entrando...";
+
+      const email = document.getElementById("login-email").value.trim();
+      const password = document.getElementById("login-clave").value;
+
+      const { error } = await db.auth.signInWithPassword({ email, password });
+
+      if (error) {
+        mostrarError("login-error", "Correo o contraseña incorrectos.");
+        btn.disabled = false;
+        btn.textContent = "Entrar";
+        return;
+      }
+
+      const perfil = await obtenerPerfil();
+      window.location.href =
+        perfil && perfil.rol === "admin" ? "admin.html" :
+        perfil && perfil.rol === "medico" ? "medico.html" : "paciente.html";
+    });
+
+    // Cargar doctores en la portada
+    (async () => {
+      const { data, error } = await db
+        .from("odontologos")
+        .select("nombre, especialidad")
+        .order("nombre");
+
+      const contenedor = document.getElementById("lista-doctores");
+
+      if (error || !data || data.length === 0) {
+        contenedor.innerHTML =
+          '<p class="vacio">No se pudo cargar el equipo. Revisa la configuración en js/config.js</p>';
+        return;
+      }
+
+      contenedor.innerHTML = data
+        .map(
+          (d) => `
+          <div class="tarjeta doctor-card">
+            <div class="avatar">${d.nombre.split(" ").slice(-1)[0].charAt(0)}</div>
+            <h3>${d.nombre}</h3>
+            <span class="especialidad">${d.especialidad}</span>
+          </div>`
+        )
+        .join("");
+    })();
+  </script>
+</body>
+</html>
