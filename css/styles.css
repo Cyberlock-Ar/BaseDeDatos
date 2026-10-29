@@ -3,9 +3,9 @@
    ============================================================ */
 
 :root {
-  --primario: #0d9488;
-  --primario-oscuro: #0f766e;
-  --primario-claro: #ccfbf1;
+  --primario: #4f46e5;
+  --primario-oscuro: #4338ca;
+  --primario-claro: #e0e7ff;
   --acento: #f59e0b;
   --fondo: #f8fafc;
   --tarjeta: #ffffff;
@@ -27,7 +27,7 @@
 }
 
 body {
-  font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+  font-family: "Poppins", "Segoe UI", system-ui, -apple-system, sans-serif;
   background: var(--fondo);
   color: var(--texto);
   line-height: 1.6;
@@ -130,7 +130,7 @@ img {
 }
 
 .btn-secundario:hover {
-  background: #99f6e4;
+  background: #c7d2fe;
 }
 
 .btn-fantasma {
@@ -163,7 +163,7 @@ img {
 
 /* ------------------------------- HERO */
 .hero {
-  background: linear-gradient(135deg, var(--primario) 0%, #115e59 100%);
+  background: linear-gradient(135deg, var(--primario) 0%, #312e81 100%);
   color: #fff;
   padding: 4.5rem 0;
 }
@@ -391,7 +391,7 @@ img {
 }
 
 .sidebar {
-  background: #0f766e;
+  background: var(--primario-oscuro);
   color: #fff;
   padding: 1.5rem 1rem;
   display: flex;
