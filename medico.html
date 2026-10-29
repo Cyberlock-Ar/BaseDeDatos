@@ -43,6 +43,10 @@
         <h1>Agenda</h1>
         <p class="subtitulo">Resumen de tu actividad clínica.</p>
 
+        <div class="alerta alerta-error oculto" id="aviso-sin-ficha" style="margin-bottom:1.5rem;">
+          Tu cuenta no tiene vinculada una ficha de odontólogo: pide al administrador que te asigne desde el panel Odontólogos.
+        </div>
+
         <div class="grid grid-4" style="margin-bottom:1.5rem;">
           <div class="stat">
             <div class="valor" id="stat-citas">0</div>
@@ -58,7 +62,7 @@
           </div>
           <div class="stat">
             <div class="valor" id="stat-pacientes">0</div>
-            <div class="etiqueta">Pacientes</div>
+            <div class="etiqueta">Mis pacientes</div>
           </div>
         </div>
 
@@ -92,13 +96,14 @@
               <tr>
                 <th>#</th>
                 <th>Paciente</th>
+                <th>Odontólogo</th>
                 <th>Fecha</th>
                 <th>Motivo</th>
                 <th>Estado</th>
               </tr>
             </thead>
             <tbody id="tabla-citas">
-              <tr><td colspan="5" class="vacio">Cargando...</td></tr>
+              <tr><td colspan="6" class="vacio">Cargando...</td></tr>
             </tbody>
           </table>
         </div>

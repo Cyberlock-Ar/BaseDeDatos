@@ -26,6 +26,7 @@ document.querySelectorAll(".nav-lateral button").forEach((btn) => {
 // ---------- INICIO ----------
 let listaCitas = [];
 let listaPacientes = [];
+let miFichaId = null; // ficha de odontólogo vinculada a esta cuenta
 
 (async function iniciar() {
   const perfil = await requerirMedico();
@@ -33,32 +34,64 @@ let listaPacientes = [];
 
   document.getElementById("usuario-nombre").textContent = perfil.nombre || "Médico";
 
+  // Buscar la ficha de odontólogo vinculada a esta cuenta de login
+  const { data: fichas } = await db
+    .from("odontologos")
+    .select("id")
+    .eq("id_usuario", perfil.id)
+    .limit(1);
+
+  miFichaId = fichas && fichas.length ? fichas[0].id : null;
+
+  if (miFichaId) {
+    await Promise.all([cargarEstadisticas(), cargarCitas()]);
+  } else {
+    mostrarAvisoSinFicha();
+  }
+
   await Promise.all([
-    cargarEstadisticas(),
-    cargarCitas(),
     cargarPacientes(),
     cargarHistorias(),
     cargarSelectPacientes(),
   ]);
 })();
 
+// Aviso cuando la cuenta del médico no tiene ficha vinculada
+function mostrarAvisoSinFicha() {
+  const aviso = document.getElementById("aviso-sin-ficha");
+  if (aviso) aviso.classList.remove("oculto");
+
+  ["stat-citas", "stat-pendientes", "stat-atendidas", "stat-pacientes"].forEach(
+    (id) => (document.getElementById(id).textContent = "—")
+  );
+
+  document.getElementById("proxima-cita").innerHTML =
+    '<p class="vacio">Tu cuenta todavía no tiene una ficha de odontólogo vinculada. ' +
+    "Pide al administrador que te asigne desde el panel Odontólogos.</p>";
+
+  document.getElementById("tabla-citas").innerHTML =
+    '<tr><td colspan="6" class="vacio">Sin ficha vinculada no hay citas que mostrar.</td></tr>';
+}
+
 // ============================================================
 //  AGENDA (ESTADÍSTICAS + PRÓXIMAS CITAS)
 // ============================================================
 async function cargarEstadisticas() {
-  const [citas, pacientes] = await Promise.all([
-    db.from("citas").select("id, estado, fecha"),
-    db.from("usuarios").select("id", { count: "exact", head: true }).eq("rol", "paciente"),
-  ]);
+  // Solo las citas de MI ficha de odontólogo
+  const { data } = await db
+    .from("citas")
+    .select("id, estado, fecha, id_usuario")
+    .eq("id_odontologo", miFichaId);
 
-  const filas = citas.data || [];
+  const filas = data || [];
   const pendientes = filas.filter((c) => c.estado === "pendiente" || c.estado === "confirmada").length;
   const atendidas = filas.filter((c) => c.estado === "atendida").length;
+  const misPacientes = new Set(filas.map((c) => c.id_usuario)).size;
 
   document.getElementById("stat-citas").textContent = filas.length;
   document.getElementById("stat-pendientes").textContent = pendientes;
   document.getElementById("stat-atendidas").textContent = atendidas;
-  document.getElementById("stat-pacientes").textContent = pacientes.count || 0;
+  document.getElementById("stat-pacientes").textContent = misPacientes;
 
   // Próximas citas (pendientes/confirmadas futuras)
   const ahora = Date.now();
@@ -94,12 +127,13 @@ async function cargarEstadisticas() {
 async function cargarCitas() {
   const { data, error } = await db
     .from("citas")
-    .select("id, fecha, motivo, estado, usuarios(nombre)")
+    .select("id, fecha, motivo, estado, usuarios(nombre), odontologos(nombre)")
+    .eq("id_odontologo", miFichaId)
     .order("fecha", { ascending: false });
 
   const tbody = document.getElementById("tabla-citas");
   if (error || !data) {
-    tbody.innerHTML = '<tr><td colspan="5" class="vacio">Error al cargar citas.</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="6" class="vacio">Error al cargar citas.</td></tr>';
     return;
   }
 
@@ -117,6 +151,7 @@ function pintarCitas(lista) {
       <tr>
         <td>${c.id}</td>
         <td><b>${esc(c.usuarios ? c.usuarios.nombre : "—")}</b></td>
+        <td>${esc(c.odontologos ? c.odontologos.nombre : "—")}</td>
         <td>${formatearFecha(c.fecha)}</td>
         <td>${esc(c.motivo) || "—"}</td>
         <td>
@@ -129,7 +164,7 @@ function pintarCitas(lista) {
       </tr>`
         )
         .join("")
-    : '<tr><td colspan="5" class="vacio">No hay citas con esos filtros.</td></tr>';
+    : '<tr><td colspan="6" class="vacio">No hay citas con esos filtros.</td></tr>';
 }
 
 function filtrarCitas() {

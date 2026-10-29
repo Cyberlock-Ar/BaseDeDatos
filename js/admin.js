@@ -186,19 +186,37 @@ async function eliminarPaciente(id) {
 //  ODONTÓLOGOS
 // ============================================================
 async function cargarOdontologos() {
-  const { data, error } = await db
-    .from("odontologos")
-    .select("id, nombre, especialidad, telefono")
-    .order("id");
+  const [{ data: odos, error }, { data: cuentas }] = await Promise.all([
+    db.from("odontologos").select("id, nombre, especialidad, telefono, id_usuario"),
+    db.from("usuarios").select("id, nombre, email, rol").order("nombre"),
+  ]);
 
   const tbody = document.getElementById("tabla-odontologos");
-  if (error || !data) {
-    tbody.innerHTML = '<tr><td colspan="5" class="vacio">Error al cargar.</td></tr>';
+  if (error || !odos) {
+    const faltaScript = error && /id_usuario/.test(error.message || "");
+    tbody.innerHTML = `<tr><td colspan="6" class="vacio">${
+      faltaScript
+        ? "Falta ejecutar el script sql/vinculo_medico.sql en Supabase."
+        : "Error al cargar."
+    }</td></tr>`;
     return;
   }
 
-  tbody.innerHTML = data.length
-    ? data
+  // Opciones: cuentas con rol médico (y la que ya esté vinculada)
+  const opcionesCuenta = (o) =>
+    '<option value="">— Sin vincular —</option>' +
+    (cuentas || [])
+      .filter((u) => u.rol === "medico" || u.id === o.id_usuario)
+      .map(
+        (u) =>
+          `<option value="${u.id}" ${u.id === o.id_usuario ? "selected" : ""}>${esc(u.nombre)}${
+            u.email ? " (" + esc(u.email) + ")" : ""
+          }</option>`
+      )
+      .join("");
+
+  tbody.innerHTML = odos.length
+    ? odos
         .map(
           (o) => `
       <tr>
@@ -206,11 +224,30 @@ async function cargarOdontologos() {
         <td><b>${esc(o.nombre)}</b></td>
         <td><span class="especialidad">${esc(o.especialidad)}</span></td>
         <td>${esc(o.telefono) || "—"}</td>
+        <td>
+          <select onchange="vincularCuenta(${o.id}, this.value)"
+                  style="padding:0.35rem;border-radius:6px;border:1px solid var(--borde);font-family:inherit;max-width:230px;">
+            ${opcionesCuenta(o)}
+          </select>
+        </td>
         <td><button class="btn btn-peligro btn-sm" onclick="eliminarOdontologo(${o.id})">Eliminar</button></td>
       </tr>`
         )
         .join("")
-    : '<tr><td colspan="5" class="vacio">No hay odontólogos registrados.</td></tr>';
+    : '<tr><td colspan="6" class="vacio">No hay odontólogos registrados.</td></tr>';
+}
+
+// Vincular la ficha del odontólogo con la cuenta de login del médico
+async function vincularCuenta(idFicha, idUsuario) {
+  const { error } = await db
+    .from("odontologos")
+    .update({ id_usuario: idUsuario || null })
+    .eq("id", idFicha);
+
+  if (error) {
+    alert("No se pudo vincular la cuenta: " + error.message);
+    await cargarOdontologos();
+  }
 }
 
 document.getElementById("form-odontologo").addEventListener("submit", async (e) => {
