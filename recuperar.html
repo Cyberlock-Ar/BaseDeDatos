@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Recuperar contraseña - Sonrisa Sana</title>
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+
+  <nav class="navbar">
+    <div class="contenedor">
+      <a href="index.html" class="logo">
+        <span class="icono">&#129463;</span>
+        Sonrisa Sana
+      </a>
+      <div class="nav-enlaces">
+        <a class="btn btn-fantasma" href="index.html">Volver al inicio</a>
+        <a class="btn btn-primario" href="index.html">Iniciar sesión</a>
+      </div>
+    </div>
+  </nav>
+
+  <main class="seccion">
+    <div class="contenedor" style="max-width:640px;">
+
+      <!-- PASO 1: PEDIR EL CORREO -->
+      <div class="tarjeta" id="paso-solicitud">
+        <div class="titulo-seccion" style="margin-bottom:1.5rem;">
+          <h2>Recuperar contraseña</h2>
+          <p>Ingresa tu correo y te enviaremos un enlace para crear una nueva contraseña</p>
+        </div>
+
+        <form class="formulario" id="form-solicitud">
+          <div class="campo">
+            <label for="rec-email">Correo electrónico</label>
+            <input type="email" id="rec-email" required placeholder="tucorreo@ejemplo.com" />
+          </div>
+
+          <div class="alerta alerta-error oculto" id="solicitud-error"></div>
+          <div class="alerta alerta-exito oculto" id="solicitud-exito"></div>
+
+          <button type="submit" class="btn btn-primario btn-ancho" id="btn-solicitud">
+            Enviar enlace de recuperación
+          </button>
+
+          <p style="text-align:center;font-size:0.9rem;">
+            ¿Ya la recordaste? <a href="index.html">Volver al inicio de sesión</a>
+          </p>
+        </form>
+      </div>
+
+      <!-- PASO 2: ESCRIBIR LA NUEVA CONTRASEÑA -->
+      <div class="tarjeta oculto" id="paso-nueva-clave">
+        <div class="titulo-seccion" style="margin-bottom:1.5rem;">
+          <h2>Nueva contraseña</h2>
+          <p id="nueva-clave-subtitulo">Crea una contraseña nueva para tu cuenta</p>
+        </div>
+
+        <form class="formulario" id="form-nueva-clave">
+          <div class="campo">
+            <label for="nueva-clave">Nueva contraseña</label>
+            <input type="password" id="nueva-clave" required minlength="6" placeholder="Mínimo 6 caracteres" />
+          </div>
+
+          <div class="campo">
+            <label for="confirmar-clave">Confirmar contraseña</label>
+            <input type="password" id="confirmar-clave" required minlength="6" placeholder="Repite la contraseña" />
+          </div>
+
+          <div class="alerta alerta-error oculto" id="clave-error"></div>
+          <div class="alerta alerta-exito oculto" id="clave-exito"></div>
+
+          <button type="submit" class="btn btn-primario btn-ancho" id="btn-nueva-clave">
+            Guardar contraseña
+          </button>
+
+          <p style="text-align:center;font-size:0.9rem;">
+            <a href="index.html">Cancelar</a>
+          </p>
+        </form>
+      </div>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    Centro Odontológico Sonrisa Sana &copy; 2026 &mdash; Proyecto de Base de Datos
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/config.js"></script>
+  <script src="js/auth.js"></script>
+  <script>
+    const pasoSolicitud = document.getElementById("paso-solicitud");
+    const pasoClave = document.getElementById("paso-nueva-clave");
+
+    // Muestra el formulario de nueva contraseña y oculta el de correo
+    function mostrarNuevaClave(subtitulo) {
+      pasoSolicitud.classList.add("oculto");
+      pasoClave.classList.remove("oculto");
+      if (subtitulo) {
+        document.getElementById("nueva-clave-subtitulo").textContent = subtitulo;
+      }
+      document.getElementById("nueva-clave").focus();
+    }
+
+    // Si el enlace del correo trae el token de recuperación (#type=recovery)
+    if (/type=recovery/.test(window.location.hash)) {
+      mostrarNuevaClave();
+    }
+
+    // Supabase avisa cuando el enlace del correo crea la sesión de recuperación
+    db.auth.onAuthStateChange((event) => {
+      if (event === "PASSWORD_RECOVERY") mostrarNuevaClave();
+    });
+
+    // Si ya hay sesión iniciada, puede cambiar la contraseña directamente
+    (async () => {
+      const session = await obtenerSesion();
+      if (session && !/type=recovery/.test(window.location.hash)) {
+        const perfil = await obtenerPerfil();
+        mostrarNuevaClave(
+          perfil && perfil.nombre
+            ? `Cuenta de ${perfil.nombre}`
+            : undefined
+        );
+      }
+    })();
+
+    // ----------------------------------------------------------
+    //  PASO 1: enviar el correo de recuperación
+    // ----------------------------------------------------------
+    document.getElementById("form-solicitud").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      limpiarError("solicitud-error");
+      limpiarError("solicitud-exito");
+
+      const btn = document.getElementById("btn-solicitud");
+      btn.disabled = true;
+      btn.textContent = "Enviando...";
+
+      const email = document.getElementById("rec-email").value.trim();
+
+      // La página de destino debe estar permitida en
+      // Supabase > Authentication > URL Configuration > Redirect URLs
+      const destino = window.location.origin + "/recuperar.html";
+
+      const { error } = await db.auth.resetPasswordForEmail(email, {
+        redirectTo: destino,
+      });
+
+      if (error) {
+        mostrarError("solicitud-error", "Error: " + error.message);
+        btn.disabled = false;
+        btn.textContent = "Enviar enlace de recuperación";
+        return;
+      }
+
+      mostrarError(
+        "solicitud-exito",
+        "¡Listo! Si el correo existe en nuestro sistema, recibirás un enlace para restablecer tu contraseña. Revisa tu bandeja de entrada y el spam."
+      );
+      btn.textContent = "Correo enviado";
+    });
+
+    // ----------------------------------------------------------
+    //  PASO 2: guardar la nueva contraseña
+    // ----------------------------------------------------------
+    document.getElementById("form-nueva-clave").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      limpiarError("clave-error");
+      limpiarError("clave-exito");
+
+      const password = document.getElementById("nueva-clave").value;
+      const confirmacion = document.getElementById("confirmar-clave").value;
+
+      if (password !== confirmacion) {
+        mostrarError("clave-error", "Las contraseñas no coinciden.");
+        return;
+      }
+
+      const btn = document.getElementById("btn-nueva-clave");
+      btn.disabled = true;
+      btn.textContent = "Guardando...";
+
+      const { error } = await db.auth.updateUser({ password });
+
+      if (error) {
+        mostrarError("clave-error", "Error: " + error.message);
+        btn.disabled = false;
+        btn.textContent = "Guardar contraseña";
+        return;
+      }
+
+      mostrarError("clave-exito", "¡Contraseña actualizada! Ya puedes iniciar sesión.");
+      setTimeout(() => {
+        window.location.href = "index.html";
+      }, 1500);
+    });
+  </script>
+</body>
+</html>
