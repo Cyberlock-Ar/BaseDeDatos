@@ -142,9 +142,13 @@
 
       const email = document.getElementById("rec-email").value.trim();
 
-      // La página de destino debe estar permitida en
-      // Supabase > Authentication > URL Configuration > Redirect URLs
-      const destino = window.location.origin + "/recuperar.html";
+      // URL completa de esta página conservando la carpeta del sitio
+      // (en GitHub Pages es .../BaseDeDatos/recuperar.html, no .../recuperar.html)
+      // Esta URL debe estar permitida en Supabase >
+      // Authentication > URL Configuration > Redirect URLs
+      const destino = window.location.href
+        .split(/[?#]/)[0]
+        .replace(/[^/]*$/, "recuperar.html");
 
       const { error } = await db.auth.resetPasswordForEmail(email, {
         redirectTo: destino,
